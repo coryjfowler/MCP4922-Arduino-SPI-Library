@@ -1,6 +1,7 @@
 /*******************************************************************************
 *  MCP4922.cpp - Library for driving MCP4922 2 channel DAC using hardware SPI. *
-* Created by Helge Nodland, January 1, 2015.								   *
+* Created by Helge Nodland, January 1, 2015.
+* Additional flexibility added by Cory J. Fowler, August 13, 2019.
 * Released into the public domain.                                             *
 *******************************************************************************/
 
@@ -34,6 +35,17 @@ MCP4922::MCP4922(int SDI, int SCK, int CS, int LDAC)
 //************************************************************************
 void MCP4922::Set(int A, int B) {
   sendIntValueSPI(A,B);
+  sendLatch();
+}
+
+//************************************************************************
+void MCP4922::Load(int A, int B) {
+  sendIntValueSPI(A,B);
+}
+
+//************************************************************************
+void MCP4922::Latch(void) {
+  sendLatch();
 }
 
 
@@ -70,27 +82,30 @@ bit 11 down to bit 0
 //************************************************************************
 
 void MCP4922::sendIntValueSPI(int A ,int B) {
-int channelA = A | 0b0111000000000000;
-int channelB = B | 0b1111000000000000;
+  int channelA = (0x0FFFF & A) | 0b0111000000000000;
+  int channelB = (0x0FFFF & B) | 0b1111000000000000;
        
-digitalWrite(_CS, LOW);
-SPI.transfer(highByte(channelA));
-SPI.transfer(lowByte(channelA));
-digitalWrite(_CS, HIGH);
+  digitalWrite(_CS, LOW);
+  SPI.transfer(highByte(channelA));
+  SPI.transfer(lowByte(channelA));
+  digitalWrite(_CS, HIGH);
 
-__asm__("nop\n\t");
-//delay(1);
+  __asm__("nop\n\t");
 
-digitalWrite(_CS, LOW);
-SPI.transfer(highByte(channelB));
-SPI.transfer(lowByte(channelB));
-digitalWrite(_CS, HIGH); 
-digitalWrite(_LDAC,LOW);
+  digitalWrite(_CS, LOW);
+  SPI.transfer(highByte(channelB));
+  SPI.transfer(lowByte(channelB));
+  digitalWrite(_CS, HIGH);
+}
 
-__asm__("nop\n\t");
-//delay(1);
 
-digitalWrite(_LDAC,HIGH);
+//************************************************************************
+void MCP4922::sendLatch(void);
+  digitalWrite(_LDAC,LOW);
+
+  __asm__("nop\n\t");
+
+  digitalWrite(_LDAC,HIGH);
 } 
  
  
