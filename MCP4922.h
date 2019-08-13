@@ -26,6 +26,8 @@ class MCP4922
   public:
     MCP4922(int SDI, int SCK,int CS, int LDAC);
     void Set(int A, int B);
+    void Load(int A, int B);
+    void Latch(void);
 
   private:
     int _SDI;
@@ -36,6 +38,7 @@ class MCP4922
 
     //void sendSPIHeader();
     void sendIntValueSPI(int A, int B);
+    void sendLatch(void);
     //void sendSPIClock();
 };
 
